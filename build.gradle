@@ -19,6 +19,12 @@ loom {
             sourceSet sourceSets.client
         }
     }
+
+    runConfigs {
+        server {
+            vmArg "-Dfile.encoding=UTF-8"
+        }
+    }
 }
 
 fabricApi {

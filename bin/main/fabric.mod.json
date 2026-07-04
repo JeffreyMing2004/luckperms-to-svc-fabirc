@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "luckperms_to_svc-fabirc",
+  "version": "${version}",
+  "name": "luckperms to svc-fabirc",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/luckperms_to_svc-fabirc/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "net.ming.luckperms_to_svcFabirc.client.Luckperms_to_svcFabircDataGenerator"
+    ],
+    "client": [
+      "net.ming.luckperms_to_svcFabirc.client.Luckperms_to_svcFabircClient"
+    ],
+    "main": [
+      "net.ming.luckperms_to_svcFabirc.Luckperms_to_svcFabirc"
+    ]
+  },
+  "mixins": [
+    "luckperms_to_svc-fabirc.mixins.json",
+    {
+      "config": "luckperms_to_svc-fabirc.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "suggests": {
+    "luckperms": "*"
+  }
+}
