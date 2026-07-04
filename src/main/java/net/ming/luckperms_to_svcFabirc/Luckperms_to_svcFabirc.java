@@ -3,13 +3,11 @@ package net.ming.luckperms_to_svcFabirc;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.group.Group;
-import net.luckperms.api.node.types.PermissionNode;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Method;
 
 public class Luckperms_to_svcFabirc implements ModInitializer {
 
@@ -33,18 +31,40 @@ public class Luckperms_to_svcFabirc implements ModInitializer {
 
     private void setupDefaultPermissions() {
         try {
-            LuckPerms api = LuckPermsProvider.get();
+            Class<?> luckPermsProviderClass = Class.forName("net.luckperms.api.LuckPermsProvider");
+            Method getMethod = luckPermsProviderClass.getMethod("get");
+            Object api = getMethod.invoke(null);
 
-            Group defaultGroup = api.getGroupManager().getGroup("default");
+            Method getGroupManagerMethod = api.getClass().getMethod("getGroupManager");
+            Object groupManager = getGroupManagerMethod.invoke(api);
+
+            Method getGroupMethod = groupManager.getClass().getMethod("getGroup", String.class);
+            Object defaultGroup = getGroupMethod.invoke(groupManager, "default");
+
             if (defaultGroup == null) {
                 LOGGER.error("无法找到 default 权限组");
                 return;
             }
 
-            defaultGroup.data().add(PermissionNode.builder("voicechat.speak").build());
-            defaultGroup.data().add(PermissionNode.builder("voicechat.listen").build());
+            Method dataMethod = defaultGroup.getClass().getMethod("data");
+            Object data = dataMethod.invoke(defaultGroup);
 
-            api.getGroupManager().saveGroup(defaultGroup);
+            Class<?> permissionNodeClass = Class.forName("net.luckperms.api.node.types.PermissionNode");
+            Method builderMethod = permissionNodeClass.getMethod("builder", String.class);
+            Object builder1 = builderMethod.invoke(null, "voicechat.speak");
+            Object builder2 = builderMethod.invoke(null, "voicechat.listen");
+
+            Method buildMethod = builder1.getClass().getMethod("build");
+            Object node1 = buildMethod.invoke(builder1);
+            Object node2 = buildMethod.invoke(builder2);
+
+            Method addMethod = data.getClass().getMethod("add", Class.forName("net.luckperms.api.node.Node"));
+            addMethod.invoke(data, node1);
+            addMethod.invoke(data, node2);
+
+            Method saveGroupMethod = groupManager.getClass().getMethod("saveGroup", defaultGroup.getClass());
+            saveGroupMethod.invoke(groupManager, defaultGroup);
+
             LOGGER.info("已为 default 权限组设置 voicechat.speak 和 voicechat.listen 权限");
         } catch (Exception e) {
             LOGGER.error("设置默认权限时出错: " + e.getMessage());
